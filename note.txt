@@ -1,0 +1,13 @@
+02/06/2026 20:02:41 INFO: You can access the web interface https://<wazuh-dashboard-ip>:443
+    User: admin
+    Password: TqeXGxqmh0ZvLZtROxm?35LhuL+u7XEE
+02/06/2026 20:02:41 INFO: Installation finished.
+tshark@wazuh-server:~$ 
+
+
+Start the agent: win--> NET START Wazuh
+
+sudo systemctl start wazuh-manager
+sudo systemctl start wazuh-indexer
+sudo systemctl start wazuh-dashboard
+sudo systemctl start filebeat
