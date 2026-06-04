@@ -1,1 +1,0 @@
-# Mini-SOC-Wazuh-Project
