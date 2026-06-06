@@ -11,3 +11,5 @@ sudo systemctl start wazuh-manager
 sudo systemctl start wazuh-indexer
 sudo systemctl start wazuh-dashboard
 sudo systemctl start filebeat
+
+Start wazuh client: NET START Wazuh
