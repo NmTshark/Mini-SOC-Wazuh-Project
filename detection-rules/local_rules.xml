@@ -1,0 +1,47 @@
+<!--
+  Controlled Mini SOC lab rules.
+  Deploy on the Wazuh manager as /var/ossec/etc/rules/local_rules.xml.
+  Review and tune paths, field names, and severity before production use.
+-->
+<group name="mini_soc_lab,windows,">
+
+  <!-- Wazuh FIM: a file was added under the dedicated lab path. -->
+  <rule id="100100" level="7">
+    <if_sid>554</if_sid>
+    <field name="syscheck.path" type="pcre2">(?i)^C:\\SOC-Lab\\</field>
+    <description>LAB: File added in monitored C:\SOC-Lab directory</description>
+    <group>fim,syscheck,lab_file_activity,</group>
+  </rule>
+
+  <!-- Sysmon Event ID 11: file creation under the dedicated lab path. -->
+  <rule id="100110" level="8">
+    <if_group>sysmon_event11</if_group>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)^C:\\SOC-Lab\\</field>
+    <description>LAB: Sysmon file creation detected in C:\SOC-Lab</description>
+    <group>sysmon,sysmon_event_11,lab_file_activity,</group>
+  </rule>
+
+  <!-- Sysmon Event ID 15: alternate data stream creation in the lab path. -->
+  <rule id="100115" level="10">
+    <if_group>sysmon_event15</if_group>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)^C:\\SOC-Lab\\[^:]+:[^\\]+</field>
+    <description>LAB: NTFS alternate data stream created in C:\SOC-Lab</description>
+    <mitre>
+      <id>T1564.004</id>
+    </mitre>
+    <group>sysmon,sysmon_event_15,alternate_data_stream,</group>
+  </rule>
+
+  <!-- Optional controlled PowerShell process test. -->
+  <rule id="100120" level="8">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\powershell\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(-ExecutionPolicy\s+Bypass|-EncodedCommand|-NoProfile)</field>
+    <description>LAB: PowerShell process with monitored command-line option</description>
+    <mitre>
+      <id>T1059.001</id>
+    </mitre>
+    <group>sysmon,sysmon_event_1,powershell,</group>
+  </rule>
+
+</group>

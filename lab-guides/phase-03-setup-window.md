@@ -20,8 +20,21 @@ This phase prepares telemetry for later detection scenarios such as:
 | UC08 | Defender tamper attempt |
 | UC09 | Unusual outbound connection |
 
+## Why this matters in SOC work
 
-## Step 1 - Verify Wazuh Agent and Sysmon
+This phase establishes the endpoint telemetry required for investigation. Windows event channels provide account, process, PowerShell, scheduled-task, and Defender activity, while Wazuh FIM records integrity changes in the monitored lab folder.
+
+## Prerequisites
+
+- Completed Phase 01 and Phase 02
+- Active Windows Wazuh agent
+- Sysmon installed and running
+- PowerShell as Administrator
+- Permission to edit the Wazuh agent configuration
+
+## Commands used
+
+### Step 1 - Verify Wazuh Agent and Sysmon
 
 Run the following commands in PowerShell as Administrator:
 
@@ -49,7 +62,7 @@ If `WazuhSvc` is not running, Wazuh will not receive logs from the Windows endpo
 
 If `Sysmon64` is not running, Sysmon events such as process creation, network connections, and DNS queries will not be generated.
 
-## Step 2 - Configure Windows Log Collection
+### Step 2 - Configure Windows Log Collection
 
 Open the Wazuh Agent configuration file as Administrator:
 
@@ -96,7 +109,7 @@ Add or verify the following blocks inside the `<ossec_config>` section:
 </localfile>
 ```
 
-![Configure](/screenshots/phase-03/configure.png)
+![Wazuh Windows eventchannel configuration](../screenshots/phase-03/configure.png)
 
 
 Important log sources:
@@ -121,7 +134,7 @@ These blocks must be placed inside:
 
 Do not place them after the closing `</ossec_config>` tag.
 
-## Step 3 - Enable Windows Audit Policy
+### Step 3 - Enable Windows Audit Policy
 
 Audit Policy controls whether Windows records important security activity.
 
@@ -134,7 +147,7 @@ auditpol /set /subcategory:"Security Group Management" /success:enable /failure:
 auditpol /set /subcategory:"Process Creation" /success:enable /failure:enable
 auditpol /set /subcategory:"Other Object Access Events" /success:enable /failure:enable
 ```
-![Configure](/screenshots/phase-03/audit.png)
+![Windows Audit Policy configuration](../screenshots/phase-03/audit.png)
 
 Verify the configuration:
 
@@ -155,7 +168,7 @@ Important events generated from these settings:
 
 If Audit Policy is not enabled, the activity may happen on the endpoint but Windows may not write the event. In that case, Wazuh will have no event to collect.
 
-## Step 4 - Enable Command-Line Logging
+### Step 4 - Enable Command-Line Logging
 
 Enable command-line details for Windows Security Event ID `4688`:
 
@@ -174,7 +187,7 @@ net user soc_lab_user P@ssw0rd123! /add
 schtasks /Create ...
 ```
 
-## Step 5 - Enable PowerShell Logging
+### Step 5 - Enable PowerShell Logging
 
 PowerShell logging helps detect suspicious PowerShell behavior such as encoded commands, download commands, and Defender configuration changes.
 
@@ -207,7 +220,7 @@ Important PowerShell events:
 | `4103` | PowerShell Module Logging |
 | `4104` | PowerShell Script Block Logging |
 
-## Step 6 - Configure File Integrity Monitoring
+### Step 6 - Configure File Integrity Monitoring
 
 For this lab, monitor only a small test folder to reduce noise:
 
@@ -255,7 +268,7 @@ C:\Program Files
 
 These paths change often and can generate many false positives.
 
-## Step 7 - Restart and Validate the Agent
+### Step 7 - Restart and Validate the Agent
 
 Restart the Wazuh Agent:
 
@@ -283,7 +296,7 @@ Select-String -Path "C:\Program Files (x86)\ossec-agent\ossec.log" -Pattern "ERR
 
 Use this step to confirm that the XML is valid, event channels are readable, and the FIM folder is being monitored.
 
-## Step 8 - Test FIM
+### Step 8 - Test FIM
 
 Create, modify, and delete a unique test file:
 
@@ -313,7 +326,7 @@ Expected FIM actions:
 - file modified
 - file deleted
 
-## Step 9 - Verify in Wazuh Dashboard
+### Step 9 - Verify in Wazuh Dashboard
 
 Open one of the following Dashboard sections:
 
@@ -321,8 +334,38 @@ Open one of the following Dashboard sections:
 Wazuh Dashboard -> Endpoints security -> File integrity monitoring
 ```
 
-![Configure](/screenshots/phase-03/testrule.png)
+![Wazuh FIM validation result](../screenshots/phase-03/testrule.png)
 
 
 We need to see the FIM alerts for the test file created, modified, and deleted in the previous step.
+
+## Expected result
+
+- `WazuhSvc` and `Sysmon64` are running.
+- Required Windows event channels are collected with `eventchannel`.
+- Audit Policy and PowerShell logging are enabled.
+- `C:\Users\Public\SOC-Lab` is monitored by Wazuh FIM in real time.
+- File added, modified, and deleted events are visible in the Wazuh Dashboard.
+
+## Evidence to capture
+
+- Wazuh eventchannel configuration
+- Windows Audit Policy configuration
+- Running Wazuh and Sysmon services
+- FIM configuration for `C:\Users\Public\SOC-Lab`
+- Dashboard evidence for the create, modify, and delete lifecycle
+
+Existing evidence is stored in [`screenshots/phase-03/`](../screenshots/phase-03/).
+
+## Troubleshooting
+
+- Confirm all XML blocks are inside `<ossec_config>`.
+- Check `ossec.log` for `ERROR`, `Invalid`, `syscheck`, and `eventchannel`.
+- Verify the source event exists locally before troubleshooting Wazuh collection.
+- Restart `WazuhSvc` after configuration changes.
+- Expand the Dashboard time range and verify the selected agent.
+
+## Completion criteria
+
+Phase 03 passes when the required Windows and Sysmon telemetry is collected and the complete FIM lifecycle is visible in Wazuh.
 

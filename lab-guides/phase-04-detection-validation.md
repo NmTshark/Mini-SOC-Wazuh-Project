@@ -16,6 +16,30 @@ The validation uses five test cases:
 
 > Run the test commands from PowerShell as Administrator. This is a controlled lab. Review each cleanup command before running it.
 
+## Why this matters in SOC work
+
+This phase proves that endpoint activity can be generated, collected, investigated, and classified using real Wazuh evidence. It also separates raw telemetry, rule-generated alerts, and custom detections.
+
+## Prerequisites
+
+- Completed Phase 01 through Phase 03
+- Active Wazuh Windows agent
+- Sysmon and the required Windows event channels available
+- Wazuh FIM monitoring `C:\Users\Public\SOC-Lab`
+- PowerShell as Administrator
+
+## Commands used
+
+Each test case includes its own controlled test command and cleanup command. Run one test case at a time and confirm its evidence before continuing.
+
+## Expected result
+
+All five test cases should produce the documented Windows, Sysmon, Task Scheduler, or FIM evidence. TC01 through TC04 should pass their detection validation, while TC05 should pass as telemetry collection without claiming that Defender was disabled or that a custom alert was generated.
+
+## Evidence to capture
+
+The evidence for this phase is embedded under each test case and stored in [`screenshots/phase-04/`](../screenshots/phase-04/).
+
 ## Evidence terminology
 
 The following terms describe different stages of the detection pipeline:
@@ -372,3 +396,15 @@ Windows activity
 ```
 
 Phase 04 demonstrates the endpoint-to-dashboard ingest and investigation chain. Windows and Sysmon generate the source telemetry, the Wazuh agent collects it, the Wazuh platform decodes and indexes it, and analysts validate the resulting events or alerts in the dashboard.
+
+## Troubleshooting
+
+- Verify the source event exists on Windows before checking Wazuh.
+- Confirm `WazuhSvc` and `Sysmon64` are running.
+- Expand the Dashboard time range and filter by the correct agent.
+- Check the Wazuh agent log for eventchannel or syscheck errors.
+- Do not classify a raw Sysmon event as a custom alert unless a custom rule ID matched.
+
+## Completion criteria
+
+Phase 04 passes when all five documented test cases have the expected evidence and the validation summary accurately distinguishes detection alerts from telemetry-only results.

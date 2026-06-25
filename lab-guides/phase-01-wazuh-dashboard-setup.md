@@ -1,51 +1,31 @@
-# Phase 01 - Wazuh Dashboard/Admin Setup
+# Phase 01 - Wazuh Dashboard Setup
 
 ## Objective
 
-The objective of this phase is to install and access the Wazuh Dashboard/Admin interface.
+Deploy the Wazuh central components on an Ubuntu/Linux server and verify access to the Wazuh Dashboard.
 
-This dashboard will be used as the main interface for monitoring agents, reviewing alerts, validating detection scenarios, and analyzing security events in later phases.
+## Why this matters in SOC work
 
-## Environment
+The Wazuh manager, indexer, and Dashboard form the central analysis platform. Endpoint telemetry is useful only when the SOC can receive, search, correlate, and investigate it reliably.
 
-| Item | Value |
-|---|---|
-| Server OS | Ubuntu Server |
-| SIEM Platform | Wazuh |
-| Wazuh Components | Wazuh Manager, Wazuh Indexer, Wazuh Dashboard |
-| Access Method | Web Browser |
+## Prerequisites
 
-## What Was Completed
+- Supported Ubuntu/Linux server
+- Administrative shell access
+- Internet access for package retrieval
+- Adequate CPU, memory, and storage for the selected deployment
+- Browser access from the analyst workstation
 
-In this phase, the Wazuh server components were installed and the Wazuh Dashboard/Admin interface was successfully accessed from a browser.
+## Commands used
 
-Completed items:
-
-- Ubuntu server prepared
-- Wazuh components installed
-- Wazuh Dashboard accessed from browser
-- Wazuh admin login verified
-- Dashboard interface confirmed working
-
-## Download and run the Wazuh installation assistant
+Review the current official Wazuh installation guide before deployment. For an all-in-one lab installation:
 
 ```bash
-curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
+curl -sO https://packages.wazuh.com/4.x/wazuh-install.sh
 sudo bash ./wazuh-install.sh -a
 ```
 
-The `-a` option installs the Wazuh central components in an all-in-one deployment.
-
-This includes:
-
-- Wazuh Manager
-- Wazuh Indexer
-- Wazuh Dashboard
-
-After the installation completes, the Wazuh Dashboard should be accessible from a browser using the Wazuh server IP address and the default admin credentials will be provided in the installation output.
-## Verification Commands
-
-The following commands can be used on the Wazuh server to verify service status:
+Verify services:
 
 ```bash
 sudo systemctl status wazuh-manager
@@ -53,30 +33,42 @@ sudo systemctl status wazuh-indexer
 sudo systemctl status wazuh-dashboard
 ```
 
-The Wazuh server IP address can be checked with:
-
-```bash
-ip a
-```
-
-
-## Expected Result
-
-The Wazuh Dashboard should be reachable from a browser using the Wazuh server IP address.
-
-Example:
+Access the interface:
 
 ```text
-https://<WAZUH_SERVER_IP>
+https://<WAZUH_DASHBOARD_ADDRESS>
 ```
-![Wazuh Dashboard](/screenshots/phase-01/dashboard-wazuh.png)
 
-The admin account should be able to log in successfully.
+Store generated credentials in a password manager. Do not commit them to Git.
 
-After logging in, the Wazuh Dashboard interface should load without errors, allowing access to the various sections for monitoring and analysis.
+## Expected result
 
-![Wazuh Dashboard Home](/screenshots/phase-01/home-wazuh.png)
+- Wazuh manager, indexer, and Dashboard services are active.
+- The Dashboard login page is reachable.
+- An authorized administrator can sign in.
+- The Dashboard loads without service or index errors.
 
-The Wazuh Dashboard/Admin interface was successfully installed and accessed from the browser. Going to this step was crucial to ensure that the central SIEM platform is operational before proceeding with agent setup and log collection in later phases and confirming that the Wazuh Dashboard is working properly will allow for effective monitoring and analysis of security events as we progress through the lab.
+## Evidence to capture
 
+![Wazuh Dashboard login](../screenshots/phase-01/dashboard-wazuh.png)
 
+![Wazuh Dashboard home](../screenshots/phase-01/home-wazuh.png)
+
+Capture service status and the Dashboard home page. The values shown in this repository belong to the isolated simulation environment.
+
+## Troubleshooting
+
+```bash
+sudo journalctl -u wazuh-manager -n 100 --no-pager
+sudo journalctl -u wazuh-indexer -n 100 --no-pager
+sudo journalctl -u wazuh-dashboard -n 100 --no-pager
+sudo ss -lntp
+```
+
+- Confirm host resources meet Wazuh requirements.
+- Check DNS, time synchronization, firewall rules, and service dependencies.
+- If a browser reports a certificate warning in the isolated lab, verify the expected certificate fingerprint before proceeding.
+
+## Completion criteria
+
+Phase 01 passes when all central services are running and the analyst can access the Dashboard.

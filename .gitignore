@@ -1,0 +1,31 @@
+# Credentials and local secrets
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+credentials*
+secrets*
+
+# Wazuh exports and local evidence that may contain sensitive fields
+archives.json
+alerts.json
+*.evtx
+*.pcap
+*.pcapng
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.tmp
+*.bak
+
+# Logs and generated files
+*.log
+dist/
+build/
