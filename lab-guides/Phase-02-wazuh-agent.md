@@ -22,19 +22,6 @@ At the end of this phase, the Windows machine should:
 | Example Agent Name | `win11-client` |
 | Required Access | PowerShell as Administrator |
 
-## What Was Completed
-
-In this phase, the Windows endpoint was connected to the Wazuh server and prepared to forward useful security telemetry.
-
-Completed items:
-
-- Wazuh agent deployed from the Dashboard-generated installer command
-- Wazuh agent service started and verified
-- Windows audit policies enabled
-- PowerShell logging enabled
-- Sysmon installed with a standard configuration
-- Additional Windows Event Channels added to `ossec.conf`
-
 ## Step 1 - Deploy the Wazuh Agent
 
 Open the Wazuh Dashboard and go to:
@@ -47,13 +34,16 @@ Use the following values:
 
 - Operating system: `Windows`
 - Server address: `192.168.116.145`
-- Agent name: `win11-client`
+- Agent name: `win10`
 
-The Dashboard will generate an installation command. A typical example is:
+![Deploy Agent](/screenshots/phase-02/deploy-new-agent.png)
+
+
+The Dashboard will generate an installation command:
 
 ```powershell
 Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.14.5-1.msi -OutFile ${env:tmp}\wazuh-agent.msi
-msiexec.exe /i ${env:tmp}\wazuh-agent.msi /q WAZUH_MANAGER="192.168.116.145" WAZUH_AGENT_NAME="win11-client"
+msiexec.exe /i ${env:tmp}\wazuh-agent.msi /q WAZUH_MANAGER="192.168.116.145" WAZUH_AGENT_NAME="win10"
 NET START WazuhSvc
 ```
 
@@ -74,11 +64,14 @@ Status   Name
 Running  WazuhSvc
 ```
 
+![Test Agent](/screenshots/phase-02/test-agent.png)
+
 Then return to the Dashboard:
 
 ```text
 Wazuh Dashboard -> Agents
 ```
+![Dashboard Agent](/screenshots/phase-02/dashboard-agent.png)
 
 The agent should appear with status `Active`.
 
@@ -266,23 +259,5 @@ Use the following checks to confirm the setup is complete:
 - PowerShell Operational logs are available
 - Sysmon Operational logs are available
 
-## Expected Result
+That is end of this phase. The Wazuh agent is now deployed on the Windows endpoint and sending rich telemetry to the Wazuh server, which will be essential for the detection scenarios in later phases.
 
-After completing this phase:
-
-- the Windows endpoint is enrolled in Wazuh
-- the agent is visible and active in the Dashboard
-- Windows audit logs are available for detection
-- PowerShell activity is logged with better visibility
-- Sysmon telemetry is collected for richer endpoint monitoring
-
-This phase prepares the endpoint for the next steps in the lab, where we will validate detections and analyze security events from the Windows host.
-
-## Notes
-
-- Screenshots have not been added yet.
-- If needed, screenshots can be inserted later for:
-  - agent deployment from Dashboard
-  - agent status `Active`
-  - Sysmon service status
-  - `ossec.conf` event channel configuration
